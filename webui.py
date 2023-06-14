@@ -76,6 +76,17 @@ if cmd_opts.server_name:
 else:
     server_name = "0.0.0.0" if cmd_opts.listen else None
 
+def check_rollback_vae():
+    if shared.cmd_opts.rollback_vae:
+        if not torch.cuda.is_available():
+            log.error("Rollback VAE functionality requires compatible GPU")
+            shared.cmd_opts.rollback_vae = False
+        elif not torch.__version__.startswith('2.1'):
+            log.error("Rollback VAE functionality requires Torch 2.1 or higher")
+            shared.cmd_opts.rollback_vae = False
+        elif 0 < torch.cuda.get_device_capability()[0] < 8:
+            log.error('Rollback VAE functionality device capabilities not met')
+            shared.cmd_opts.rollback_vae = False
 
 def fix_asyncio_event_loop_policy():
     """
@@ -224,7 +235,7 @@ def configure_sigint_handler():
 def configure_opts_onchange():
     shared.opts.onchange("sd_model_checkpoint", wrap_queued_call(lambda: modules.sd_models.reload_model_weights()), call=False)
     shared.opts.onchange("sd_vae", wrap_queued_call(lambda: modules.sd_vae.reload_vae_weights()), call=False)
-    shared.opts.onchange("sd_vae_as_default", wrap_queued_call(lambda: modules.sd_vae.reload_vae_weights()), call=False)
+    #shared.opts.onchange("sd_vae_as_default", wrap_queued_call(lambda: modules.sd_vae.reload_vae_weights()), call=False)
     shared.opts.onchange("temp_dir", ui_tempdir.on_tmpdir_changed)
     shared.opts.onchange("gradio_theme", shared.reload_gradio_theme)
     shared.opts.onchange("cross_attention_optimization", wrap_queued_call(lambda: modules.sd_hijack.model_hijack.redo_hijack(shared.sd_model)), call=False)
@@ -232,6 +243,11 @@ def configure_opts_onchange():
 
 
 def initialize():
+    log.debug('Entering Initialize')
+    check_rollback_vae()
+    modules.sd_vae.refresh_vae_list()
+    startup_timer.record("vae")
+    
     fix_asyncio_event_loop_policy()
     validate_tls_options()
     configure_sigint_handler()
@@ -282,8 +298,8 @@ def initialize_rest(*, reload_script_modules=False):
     modelloader.load_upscalers()
     startup_timer.record("load upscalers")
 
-    modules.sd_vae.refresh_vae_list()
-    startup_timer.record("refresh VAE")
+    #modules.sd_vae.refresh_vae_list()
+    #startup_timer.record("refresh VAE")
     modules.textual_inversion.textual_inversion.list_textual_inversion_templates()
     startup_timer.record("refresh textual inversion templates")
 
