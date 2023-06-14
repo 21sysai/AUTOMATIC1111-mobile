@@ -10,7 +10,6 @@ import warnings
 import json
 from threading import Thread
 from typing import Iterable
-from modules import timer, errors
 
 from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -244,7 +243,7 @@ def configure_opts_onchange():
 
 
 def initialize():
-    log.debug('Entering Initialize')
+    #log.debug('Entering Initialize')
     check_rollback_vae()
     modules.sd_vae.refresh_vae_list()
     startup_timer.record("vae")
