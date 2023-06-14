@@ -247,7 +247,6 @@ def initialize():
     check_rollback_vae()
     modules.sd_vae.refresh_vae_list()
     startup_timer.record("vae")
-    
     fix_asyncio_event_loop_policy()
     validate_tls_options()
     configure_sigint_handler()
