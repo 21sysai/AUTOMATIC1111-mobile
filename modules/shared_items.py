@@ -1,5 +1,3 @@
-
-
 def realesrgan_models_names():
     import modules.realesrgan_model
     return [x.name for x in modules.realesrgan_model.get_realesrgan_models(None)]
@@ -23,9 +21,13 @@ def refresh_vae_list():
     modules.sd_vae.refresh_vae_list()
 
 
-def cross_attention_optimizations():
-    import modules.sd_hijack
-
-    return ["Automatic"] + [x.title() for x in modules.sd_hijack.optimizers] + ["None"]
-
-
+def list_crossattention():
+    return [
+        "Disable cross-attention layer optimization",
+        "xFormers",
+        "Scaled-Dot-Product",
+        "Doggettx's",
+        "InvokeAI's",
+        "Sub-quadratic",
+        "Split attention"
+    ]
